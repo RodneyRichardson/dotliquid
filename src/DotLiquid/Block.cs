@@ -177,10 +177,6 @@ namespace DotLiquid
                     if (token is IRenderable renderableToken)
                     {
                         renderableToken.Render(context, result);
-                        if (context.IsInterrupt())
-                        {
-                            return;
-                        }
                     }
                     else
                     {

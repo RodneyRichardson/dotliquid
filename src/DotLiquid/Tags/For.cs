@@ -175,12 +175,17 @@ namespace DotLiquid.Tags
                         Name = _name
                     };
 
-                    RenderAll(ForBlock, context, result);
-                    if (context.IsInterrupt())
+                    try
                     {
-                        var interrupt = context.PopInterrupt();
-                        if (interrupt is BreakInterrupt)
-                            break;
+                        RenderAll(ForBlock, context, result);
+                    }
+                    catch (BreakInterrupt)
+                    {
+                        break;
+                    }
+                    catch (ContinueInterrupt)
+                    {
+                        // ContinueInterrupt is used only to skip the current value but not to stop the iteration
                     }
                 }
             });

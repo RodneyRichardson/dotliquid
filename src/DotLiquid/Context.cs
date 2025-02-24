@@ -59,12 +59,6 @@ namespace DotLiquid
             }
         }
 
-        private readonly Stack<InterruptException> _interrupted = new Stack<InterruptException>();
-
-        internal void PushInterrupt(InterruptException e) => _interrupted.Push(e);
-        internal InterruptException PopInterrupt() => _interrupted.Pop();
-        internal bool IsInterrupt() => _interrupted.Any();
-
         private IDictionary<string, int> _disabledTags = new Dictionary<string, int>();
         internal bool IsTagDisabled(string tagName) => _disabledTags.TryGetValue(tagName, out var cnt) && cnt > 0;
         public void WithDisabledTags(string[] tagNames, Action action)
@@ -96,11 +90,14 @@ namespace DotLiquid
             get { return _maxIterations; }
         }
 
+        private const int MAX_SCOPES = 80;
         private int _baseScopePath;
         private void CheckOverflow()
         {
-            if (_baseScopePath + Scopes.Count > 80)
+            if (_baseScopePath + Scopes.Count > MAX_SCOPES)
+            {
                 throw new StackLevelException(Liquid.ResourceManager.GetString("ContextStackException"));
+            }
         }
 
         private Strainer _strainer;
@@ -189,14 +186,14 @@ namespace DotLiquid
         /// <param name="cancellationToken"></param>
         /// <param name="staticEnvironments"></param>
         public Context
-        (List<Hash> environments
-            , Hash outerScope
-            , Hash registers
-            , ErrorsOutputMode errorsOutputMode
-            , int maxIterations
-            , IFormatProvider formatProvider
-            , CancellationToken cancellationToken
-            , List<Hash> staticEnvironments)
+            (List<Hash> environments
+             , Hash outerScope
+             , Hash registers
+             , ErrorsOutputMode errorsOutputMode
+             , int maxIterations
+             , IFormatProvider formatProvider
+             , CancellationToken cancellationToken
+             , List<Hash> staticEnvironments)
         {
             Environments = environments ?? new List<Hash>();
             if (Environments.Count == 0)

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
     Microsoft ResX Schema
@@ -200,9 +200,6 @@
   </data>
   <data name="IncludeTagSyntaxException" xml:space="preserve">
     <value>Syntax Error in 'include' tag - Valid syntax: include [template]</value>
-  </data>
-  <data name="RenderTagSyntaxException" xml:space="preserve">
-    <value>Syntax Error in 'render' tag - Valid syntax: render '[template]'</value>
   </data>
   <data name="LocalFileSystemIllegalTemplateNameException" xml:space="preserve">
     <value>Error - Illegal template name '{0}'</value>
