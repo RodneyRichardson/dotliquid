@@ -14,16 +14,16 @@ namespace DotLiquid
 
         private class CultureScope : IDisposable
         {
-            private readonly CultureInfo _culture;
+            private readonly CultureInfo culture;
 
             public CultureScope(CultureInfo culture)
             {
-                _culture = culture;
+                this.culture = culture;
             }
 
             public void Dispose()
             {
-                System.Threading.Thread.CurrentThread.CurrentCulture = this._culture;
+                System.Threading.Thread.CurrentThread.CurrentCulture = this.culture;
             }
         }
     }
