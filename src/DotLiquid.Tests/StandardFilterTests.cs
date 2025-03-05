@@ -318,7 +318,7 @@ PaulGeorge",
         public void TestSortV20()
         {
             var ints = new[] { 10, 3, 2, 1 };
-            Assert.That(StandardFilters.Sort(_contextV20, null), Is.EqualTo(null));
+            Assert.That(StandardFilters.Sort(_contextV20, null), Is.EqualTo(null).AsCollection);
             Assert.That(StandardFilters.Sort(_contextV20, new string[] { }), Is.EqualTo(new string[] { }).AsCollection);
             Assert.That(StandardFilters.Sort(_contextV20, ints), Is.EqualTo(new[] { 1, 2, 3, 10 }).AsCollection);
             Assert.That(StandardFilters.Sort(_contextV20, new[] { new { a = 10 }, new { a = 3 }, new { a = 1 }, new { a = 2 } }, "a"), Is.EqualTo(new[] { new { a = 1 }, new { a = 2 }, new { a = 3 }, new { a = 10 } }).AsCollection);
@@ -2090,7 +2090,7 @@ Cheapest products:
             var array = new String[] { "one", "two", "three" };
             var arrayReversed = new String[] { "three", "two", "one" };
 
-            Assert.That(StandardFilters.Reverse(null), Is.EqualTo(null));
+            Assert.That(StandardFilters.Reverse(null), Is.EqualTo(null).AsCollection);
             Assert.That(StandardFilters.Reverse(array), Is.EqualTo(arrayReversed).AsCollection);
             Assert.That(StandardFilters.Reverse(arrayReversed), Is.EqualTo(array).AsCollection);
             Assert.That(StandardFilters.Reverse(new[] { 1, 2, 2, 3 }), Is.EqualTo(new[] { 3, 2, 2, 1 }).AsCollection);
