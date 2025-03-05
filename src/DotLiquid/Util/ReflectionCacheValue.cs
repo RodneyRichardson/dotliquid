@@ -26,9 +26,9 @@ namespace DotLiquid.Util
         {
             return (_type.Name.StartsWith("<>") || _type.Name.StartsWith("VB$"))
                 && (_type.Name.Contains("AnonymousType") || _type.Name.Contains("AnonType"))
-                && _type.GetCustomAttribute<CompilerGeneratedAttribute>() != null
-                && _type.IsGenericType
-                && (_type.Attributes & AnonymousTypeAttributes) == AnonymousTypeAttributes;
+                    && _type.GetCustomAttribute<CompilerGeneratedAttribute>() != null
+                        && _type.IsGenericType
+                            && (_type.Attributes & AnonymousTypeAttributes) == AnonymousTypeAttributes;
         }
     }
 }
