@@ -318,7 +318,7 @@ PaulGeorge",
         public void TestSortV20()
         {
             var ints = new[] { 10, 3, 2, 1 };
-            Assert.That(StandardFilters.Sort(_contextV20, null), Is.EqualTo(null).AsCollection);
+            Assert.That(StandardFilters.Sort(_contextV20, null), Is.EqualTo(null));
             Assert.That(StandardFilters.Sort(_contextV20, new string[] { }), Is.EqualTo(new string[] { }).AsCollection);
             Assert.That(StandardFilters.Sort(_contextV20, ints), Is.EqualTo(new[] { 1, 2, 3, 10 }).AsCollection);
             Assert.That(StandardFilters.Sort(_contextV20, new[] { new { a = 10 }, new { a = 3 }, new { a = 1 }, new { a = 2 } }, "a"), Is.EqualTo(new[] { new { a = 1 }, new { a = 2 }, new { a = 3 }, new { a = 10 } }).AsCollection);
@@ -2050,7 +2050,7 @@ Cheapest products:
             var array1 = new String[] { "one", "two" };
             var array2 = new String[] { "alpha", "bravo" };
 
-            Assert.That(StandardFilters.Concat(null, null), Is.EqualTo(null));
+            Assert.That(StandardFilters.Concat(null, null), Is.EqualTo(null).AsCollection);
             Assert.That(StandardFilters.Concat(array1, null), Is.EqualTo(array1).AsCollection);
             Assert.That(StandardFilters.Concat(null, array1), Is.EqualTo(array1).AsCollection);
             Assert.That(StandardFilters.Concat(array1, array2), Is.EqualTo(new[] { "one", "two", "alpha", "bravo" }).AsCollection);
