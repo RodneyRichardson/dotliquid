@@ -142,8 +142,8 @@ namespace DotLiquid
                 if (args[argumentIndex] is IConvertible convertibleArg)
                 {
                     var parameterType = parameterInfos[argumentIndex].ParameterType;
-                    if (convertibleArg.GetType() != parameterType &&
-                        !parameterType.IsInstanceOfType(convertibleArg))
+                    if (convertibleArg.GetType() != parameterType
+                        && !parameterType.IsAssignableFrom(convertibleArg.GetType()))
                     {
                         args[argumentIndex] = Convert.ChangeType(convertibleArg, parameterType);
                     }
