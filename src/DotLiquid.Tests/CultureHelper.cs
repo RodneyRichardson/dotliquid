@@ -23,7 +23,7 @@ namespace DotLiquid
 
             public void Dispose()
             {
-                System.Threading.Thread.CurrentThread.CurrentCulture = this.culture;
+                System.Threading.Thread.CurrentThread.CurrentCulture =  this.culture;
             }
         }
     }
