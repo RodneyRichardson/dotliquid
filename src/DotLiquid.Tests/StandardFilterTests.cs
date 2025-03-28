@@ -2230,8 +2230,8 @@ Cheapest products:
                         value1 = "1,2",
                         value2 = "1,200",
                         value3 = "1200",
-                        value4 = "1.200",
-                        value5 = "1.200,00",
+                        value4 = "1 200",
+                        value5 = "1 200,00",
                     });
 
                     Helper.AssertTemplateResult("2,2", "{{ 1,0 | plus: value1 }}",
