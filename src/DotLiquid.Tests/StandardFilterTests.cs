@@ -2218,6 +2218,101 @@ Cheapest products:
             });
         }
 
+        [Test]
+        public void TestStringToNumberQuirks()
+        {
+            Assert.Multiple(() =>
+            {
+                using (CultureHelper.SetCulture("fr-FR"))
+                {
+                    var localVariables = Hash.FromAnonymousObject(new
+                    {
+                        value1 = "1,2",
+                        value2 = "1,200",
+                        value3 = "1200",
+                        value4 = "1.200",
+                        value5 = "1.200,00",
+                    });
+
+                    Helper.AssertTemplateResult("2,2", "{{ 1,0 | plus: value1 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("2,2", "{{ 1,0 | plus: value2 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1201", "{{ 1,0 | plus: value3 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1201", "{{ 1,0 | plus: value4 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1201", "{{ 1,0 | plus: value5 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+
+                    Helper.AssertTemplateResult("1,2", "{{ 1,0 | times: value1 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1,2", "{{ 1,0 | times: value2 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1200", "{{ 1,0 | times: value3 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1200", "{{ 1,0 | times: value4 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1200", "{{ 1,0 | times: value5 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+                }
+
+                using (CultureHelper.SetCulture("en-US"))
+                {
+                    var localVariables = Hash.FromAnonymousObject(new
+                    {
+                        value1 = "1.2",
+                        value2 = "1.200",
+                        value3 = "1200",
+                        value4 = "1,200",
+                        value5 = "1,200.00",
+                    });
+
+                    Helper.AssertTemplateResult("2.2", "{{ 1.0 | plus: value1 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("2.2", "{{ 1.0 | plus: value2 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1201", "{{ 1.0 | plus: value3 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1201", "{{ 1.0 | plus: value4 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1201", "{{ 1.0 | plus: value5 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+
+                    Helper.AssertTemplateResult("1.2", "{{ 1.0 | times: value1 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1.2", "{{ 1.0 | times: value2 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1200", "{{ 1.0 | times: value3 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1200", "{{ 1.0 | times: value4 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+
+                    Helper.AssertTemplateResult("1200", "{{ 1.0 | times: value5 }}",
+                        localVariables, SyntaxCompatibility.DotLiquid22a);
+                }
+
+            });
+
+        }
+
         private class ProductDrop : Drop
         {
             public string Title { get; set; }
