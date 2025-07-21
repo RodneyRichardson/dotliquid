@@ -1,8 +1,10 @@
+using DotLiquid.Util;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -35,7 +37,73 @@ namespace DotLiquid
         /// <param name="input">The object to sort</param>
         /// <param name="property">Optional property with which to sort an array of hashes or drops</param>
         [LiquidFilter(MaxVersion = SyntaxCompatibility.DotLiquid21)]
-        public static IEnumerable Sort(object input, string property = null) => StandardFilters.SortInternal(StringComparer.OrdinalIgnoreCase, input, property);
+        public static IEnumerable Sort(object input, string property = null)
+        {
+            if (input == null)
+                return null;
+
+            StringComparer comparer = StringComparer.OrdinalIgnoreCase;
+
+            List<object> ary;
+            if (input is IEnumerable<Hash> enumerableHash && !string.IsNullOrEmpty(property))
+                ary = enumerableHash.Cast<object>().ToList();
+            else if (input is IEnumerable enumerableInput)
+                ary = enumerableInput.Flatten().Cast<object>().ToList();
+            else
+            {
+                ary = new List<object>(new[] { input });
+            }
+
+            if (!ary.Any())
+                return ary;
+
+            if (string.IsNullOrEmpty(property))
+            {
+                ary.Sort((a, b) => comparer.Compare(a, b));
+            }
+            else
+            {
+                ary.Sort((a, b) =>
+                {
+                    var aPropertyValue = ResolveObjectPropertyValue(a, property);
+                    var bPropertyValue = ResolveObjectPropertyValue(b, property);
+                    return comparer.Compare(aPropertyValue, bPropertyValue);
+                });
+            }
+
+            return ary;
+        }
+
+        private static object ResolveObjectPropertyValue(this object obj, string propertyName)
+        {
+            if (obj == null)
+                return null;
+            if (obj is IDictionary dictionary && dictionary.Contains(key: propertyName))
+                return dictionary[propertyName];
+            if (obj is IDictionary<string, object> dictionaryObject && dictionaryObject.ContainsKey(propertyName))
+                return dictionaryObject[propertyName];
+            var indexable = obj as IIndexable;
+            if (indexable == null)
+            {
+                var type = obj.GetType();
+                var safeTypeTransformer = Template.GetSafeTypeTransformer(type);
+                if (safeTypeTransformer != null)
+                    indexable = safeTypeTransformer(obj) as DropBase;
+                else
+                {
+                    if (DropProxy.TryFromLiquidType(obj, type, out var drop))
+                    {
+                        indexable = drop;
+                    }
+                    else if (TypeUtility.IsAnonymousType(type) && obj.GetType().GetRuntimeProperty(propertyName) != null)
+                    {
+                        return type.GetRuntimeProperty(propertyName).GetValue(obj, null);
+                    }
+                }
+            }
+
+            return (indexable?.ContainsKey(propertyName) ?? false) ? indexable[propertyName] : null;
+        }
 
         /// <summary>
         /// Remove the first occurrence of a substring
