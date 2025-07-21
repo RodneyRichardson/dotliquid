@@ -1,7 +1,8 @@
+using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 
 namespace DotLiquid.Tests.Filters
 {
@@ -18,6 +19,7 @@ namespace DotLiquid.Tests.Filters
         public abstract ReplaceDelegate Replace { get; }
         public abstract ReplaceFirstDelegate ReplaceFirst { get; }
         public abstract SliceDelegate Slice { get; }
+        public abstract SortDelegate Sort { get; }
         public abstract SplitDelegate Split { get; }
         public abstract MathDelegate Times { get; }
         public abstract TruncateWordsDelegate TruncateWords { get; }
@@ -28,6 +30,7 @@ namespace DotLiquid.Tests.Filters
         public delegate string ReplaceDelegate(string input, string @string, string replacement);
         public delegate string ReplaceFirstDelegate(string input, string @string, string replacement);
         public delegate object SliceDelegate(object input, int start, int? len = null);
+        public delegate IEnumerable SortDelegate(object input, string property = null);
         public delegate string[] SplitDelegate(string input, string pattern);
         public delegate string TruncateWordsDelegate(string input, int? words = null, string truncateString = null);
 
@@ -38,7 +41,6 @@ namespace DotLiquid.Tests.Filters
             Assert.That(Capitalize(input: ""), Is.EqualTo(""));
             Assert.That(Capitalize(input: " "), Is.EqualTo(" "));
         }
-
 
         [Test]
         public void TestDividedBy()
@@ -212,5 +214,44 @@ namespace DotLiquid.Tests.Filters
         {
             return input.ToCharArray().Select(character => character.ToString()).ToArray();
         }
+
+        #region TODO: Move these to Helpers
+        protected static Hash CreateHash(int sortby, string content) =>
+            new Hash
+            {
+                { "sortby", sortby },
+                { "content", content }
+            };
+
+        protected class Package : IIndexable, ILiquidizable
+        {
+            private readonly int numberOfPiecesPerPackage;
+
+            private readonly string test;
+
+            public Package(int numberOfPiecesPerPackage, string test)
+            {
+                this.numberOfPiecesPerPackage = numberOfPiecesPerPackage;
+                this.test = test;
+            }
+
+            public object this[object key] => key as string == "numberOfPiecesPerPackage"
+                ? this.numberOfPiecesPerPackage as object
+                : key as string == "test"
+                    ? test
+                    : null;
+
+            public bool ContainsKey(object key)
+            {
+                return new List<string> { nameof(numberOfPiecesPerPackage), nameof(test) }
+                    .Contains(key);
+            }
+
+            public object ToLiquid()
+            {
+                return this;
+            }
+        };
+        #endregion
     }
 }

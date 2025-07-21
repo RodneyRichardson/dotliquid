@@ -209,44 +209,6 @@ PaulGeorge",
 {{ beatles | join: "" and "" }}");
         }
 
-        [Test]
-        public void TestSortV20()
-        {
-            var ints = new[] { 10, 3, 2, 1 };
-            Assert.That(LegacyFilters.Sort(null), Is.EqualTo(null));
-            Assert.That(LegacyFilters.Sort(new string[] { }), Is.EqualTo(new string[] { }).AsCollection);
-            Assert.That(LegacyFilters.Sort(ints), Is.EqualTo(new[] { 1, 2, 3, 10 }).AsCollection);
-            Assert.That(LegacyFilters.Sort(new[] { new { a = 10 }, new { a = 3 }, new { a = 1 }, new { a = 2 } }, "a"), Is.EqualTo(new[] { new { a = 1 }, new { a = 2 }, new { a = 3 }, new { a = 10 } }).AsCollection);
-
-            // Issue #393 - Incorrect (Case-Insensitve) Alphabetic Sort
-            var strings = new[] { "zebra", "octopus", "giraffe", "Sally Snake" };
-            Assert.That(LegacyFilters.Sort(strings), Is.EqualTo(new[] { "giraffe", "octopus", "Sally Snake", "zebra" }).AsCollection);
-
-            var hashes = new List<Hash>();
-            for (var i = 0; i < strings.Length; i++)
-                hashes.Add(CreateHash(ints[i], strings[i]));
-            Assert.That(LegacyFilters.Sort(hashes, "content"), Is.EqualTo(new[] { hashes[2], hashes[1], hashes[3], hashes[0] }).AsCollection);
-            Assert.That(LegacyFilters.Sort(hashes, "sortby"), Is.EqualTo(new[] { hashes[3], hashes[2], hashes[1], hashes[0] }).AsCollection);
-        }
-
-        [Test]
-        public void TestSortV22()
-        {
-            var ints = new[] { 10, 3, 2, 1 };
-            Assert.That(StandardFilters.Sort(null), Is.EqualTo(null));
-            Assert.That(StandardFilters.Sort(new string[] { }), Is.EqualTo(new string[] { }).AsCollection);
-            Assert.That(StandardFilters.Sort(ints), Is.EqualTo(new[] { 1, 2, 3, 10 }).AsCollection);
-            Assert.That(StandardFilters.Sort(new[] { new { a = 10 }, new { a = 3 }, new { a = 1 }, new { a = 2 } }, "a"), Is.EqualTo(new[] { new { a = 1 }, new { a = 2 }, new { a = 3 }, new { a = 10 } }).AsCollection);
-
-            var strings = new[] { "zebra", "octopus", "giraffe", "Sally Snake" };
-            Assert.That(StandardFilters.Sort(strings), Is.EqualTo(new[] { "Sally Snake", "giraffe", "octopus", "zebra" }).AsCollection);
-
-            var hashes = new List<Hash>();
-            for (var i = 0; i < strings.Length; i++)
-                hashes.Add(CreateHash(ints[i], strings[i]));
-            Assert.That(StandardFilters.Sort(hashes, "content"), Is.EqualTo(new[] { hashes[3], hashes[2], hashes[1], hashes[0] }).AsCollection);
-            Assert.That(StandardFilters.Sort(hashes, "sortby"), Is.EqualTo(new[] { hashes[3], hashes[2], hashes[1], hashes[0] }).AsCollection);
-        }
 
         [Test]
         public void TestSortNatural()
@@ -265,79 +227,6 @@ PaulGeorge",
                 hashes.Add(CreateHash(ints[i], strings[i]));
             Assert.That(StandardFilters.SortNatural(hashes, "content"), Is.EqualTo(new[] { hashes[2], hashes[1], hashes[3], hashes[0] }).AsCollection);
             Assert.That(StandardFilters.SortNatural(hashes, "sortby"), Is.EqualTo(new[] { hashes[3], hashes[2], hashes[1], hashes[0] }).AsCollection);
-        }
-
-        [Test]
-        public void TestSort_OnHashList_WithProperty_DoesNotFlattenList()
-        {
-            var list = new List<Hash>();
-            var hash1 = CreateHash(1, "Text1");
-            var hash2 = CreateHash(2, "Text2");
-            var hash3 = CreateHash(3, "Text3");
-            list.Add(hash3);
-            list.Add(hash1);
-            list.Add(hash2);
-
-            var result = LegacyFilters.Sort(list, "sortby").Cast<Hash>().ToArray();
-            Assert.That(result.Count(), Is.EqualTo(3));
-            Assert.That(result[0]["content"], Is.EqualTo(hash1["content"]));
-            Assert.That(result[1]["content"], Is.EqualTo(hash2["content"]));
-            Assert.That(result[2]["content"], Is.EqualTo(hash3["content"]));
-        }
-
-        [Test]
-        public void TestSort_OnDictionaryWithPropertyOnlyInSomeElement_ReturnsSortedDictionary()
-        {
-            var list = new List<Hash>();
-            var hash1 = CreateHash(1, "Text1");
-            var hash2 = CreateHash(2, "Text2");
-            var hashWithNoSortByProperty = new Hash();
-            hashWithNoSortByProperty.Add("content", "Text 3");
-            list.Add(hash2);
-            list.Add(hashWithNoSortByProperty);
-            list.Add(hash1);
-
-            var result = LegacyFilters.Sort(list, "sortby").Cast<Hash>().ToArray();
-            Assert.That(result.Count(), Is.EqualTo(3));
-            Assert.That(result[0]["content"], Is.EqualTo(hashWithNoSortByProperty["content"]));
-            Assert.That(result[1]["content"], Is.EqualTo(hash1["content"]));
-            Assert.That(result[2]["content"], Is.EqualTo(hash2["content"]));
-        }
-
-        [Test]
-        public void TestSort_Indexable()
-        {
-            var packages = new[] {
-                new Package(numberOfPiecesPerPackage: 2, test: "p1"),
-                new Package(numberOfPiecesPerPackage: 1, test: "p2"),
-                new Package(numberOfPiecesPerPackage: 3, test: "p3"),
-            };
-            var expectedPackages = packages.OrderBy(p => p["numberOfPiecesPerPackage"]).ToArray();
-
-            Helper.LockTemplateStaticVars(new RubyNamingConvention(), () =>
-            {
-                Assert.That(
-                    actual: LegacyFilters.Sort(packages, "numberOfPiecesPerPackage"), Is.EqualTo(expected: expectedPackages).AsCollection);
-            });
-        }
-
-        [Test]
-        public void TestSort_ExpandoObject()
-        {
-            dynamic package1 = new ExpandoObject();
-            package1.numberOfPiecesPerPackage = 2;
-            package1.test = "p1";
-            dynamic package2 = new ExpandoObject();
-            package2.numberOfPiecesPerPackage = 1;
-            package2.test = "p2";
-            dynamic package3 = new ExpandoObject();
-            package3.numberOfPiecesPerPackage = 3;
-            package3.test = "p3";
-            var packages = new List<ExpandoObject> { package1, package2, package3 };
-            var expectedPackages = new List<ExpandoObject> { package2, package1, package3 };
-
-            Assert.That(
-                actual: LegacyFilters.Sort(packages, property: "numberOfPiecesPerPackage"), Is.EqualTo(expected: expectedPackages));
         }
 
         private static Hash CreateHash(int sortby, string content) =>
