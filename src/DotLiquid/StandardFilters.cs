@@ -333,7 +333,10 @@ namespace DotLiquid
         /// <param name="input">The object to sort</param>
         /// <param name="property">Optional property with which to sort an array of hashes or drops</param>
         [LiquidFilter(MinVersion = SyntaxCompatibility.DotLiquid22)]
-        public static IEnumerable Sort(object input, string property = null) => SortInternal(StringComparer.Ordinal, input, property);
+        public static IEnumerable Sort(object input, string property = null)
+        {
+            return SortInternal(StringComparer.Ordinal, input, property);
+        }
 
         /// <summary>
         /// Sort elements of the array in case-insensitive order
