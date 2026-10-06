@@ -1,30 +1,29 @@
 # Build script for dotliquid is presently stored securely on AppVeyor.
 # Below is ignored and kept for informational purposes only
-version: 2.2.{build}
-image: Visual Studio 2022
+version: 2.4.{build}
+image: Visual Studio 2026
 configuration: Release
-assembly_info:
+dotnet_csproj:
   patch: true
-  file: AssemblyInfo.*
+  file: '**\*.csproj'
+  version: '{version}'
+  version_prefix: '{version}'
+  package_version: '{version}'
   assembly_version: '{version}'
-  assembly_file_version: '{version}'
-  assembly_informational_version: '{version}-$(APPVEYOR_REPO_COMMIT)'
+  file_version: '{version}'
+  informational_version: '{version}-$(APPVEYOR_REPO_COMMIT)'
 install:
 - cmd: >-
     choco install opencover.portable -y
 
     choco install codecov -y
 
-    choco install dotnetcore-runtime.install --version=1.1.13 --allow-downgrade -y
-
-    choco install dotnetcore-runtime.install --version=2.1.30 -y
-
+    dotnet --list-sdks | find "6.0." >nul || choco install dotnet-6.0-sdk -y
+    
     dotnet restore src/DotLiquid.sln
 cache:
 - C:\ProgramData\chocolatey\bin -> appveyor.yml
 - C:\ProgramData\chocolatey\lib -> appveyor.yml
-nuget:
-  project_feed: true
 build:
   project: src/DotLiquid.sln
   verbosity: minimal
@@ -32,7 +31,7 @@ after_build:
 - ps: >-
     New-Item -Path build\pkg -ItemType Directory
 
-    nuget pack src/DotLiquid/DotLiquid.nuspec -Symbols -SymbolPackageFormat snupkg -Version "$($env:APPVEYOR_BUILD_VERSION)" -OutputDirectory build\pkg
+    dotnet pack src\DotLiquid\DotLiquid.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg --output build\pkg --no-build
 test_script:
 - cmd: >-
     opencover.console -target:"C:\Program Files\dotnet\dotnet.exe" -targetargs:"test src\DotLiquid.Tests\DotLiquid.Tests.csproj /clp:ErrorsOnly" -output:TestsCoverage.xml -filter:"+[DotLiquid]*" -register:user -returntargetcode -oldstyle
