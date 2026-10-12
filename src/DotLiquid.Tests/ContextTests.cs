@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using DotLiquid.Exceptions;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -682,6 +684,68 @@ namespace DotLiquid.Tests
             Assert.That(_context["(1..5)"] as IEnumerable, Is.EqualTo(Enumerable.Range(1, 5)).AsCollection);
             Assert.That(_context["(1..test)"] as IEnumerable, Is.EqualTo(Enumerable.Range(1, 5)).AsCollection);
             Assert.That(_context["(test..test)"] as IEnumerable, Is.EqualTo(Enumerable.Range(5, 1)).AsCollection);
+
+            // (0..int.MaxValue) has int.MaxValue + 1 elements, which overflows Int32 when computed as (end - start + 1).
+            var ascendingRange = (_context[$"(0..{int.MaxValue})"] as IEnumerable).Cast<object>();
+            // Only take a few elements from the front to avoid materializing billions of items.
+            Assert.That(ascendingRange.Take(3), Is.EqualTo(new object[] { 0, 1, 2 }).AsCollection);
+
+            // (int.MaxValue..int.MinValue) is descending and should yield an empty range,
+            // not a huge positive count computed via overflowed Int32 arithmetic.
+            Assert.That(_context[$"({int.MaxValue}..{int.MinValue})"] as IEnumerable, Is.Empty);
+        }
+
+
+        [Test]
+        public void TestRangeAtIntMaxValueTerminates()
+        {
+            _context.Merge(Hash.FromAnonymousObject(new { max = int.MaxValue }));
+            var range = _context["(max..max)"] as IEnumerable;
+
+            using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
+            {
+                var enumerator = range.GetEnumerator();
+                var task = Task.Run(() =>
+                {
+                    var result = new List<object>();
+                    while (enumerator.MoveNext())
+                    {
+                        cts.Token.ThrowIfCancellationRequested();
+                        result.Add(enumerator.Current);
+                    }
+                    return result;
+                }, cts.Token);
+
+                Assert.That(() => task.Wait(cts.Token), Throws.Nothing, "Enumerating range (int.MaxValue..int.MaxValue) did not terminate within the timeout.");
+                Assert.That(task.Result, Is.EqualTo(new[] { int.MaxValue }));
+            }
+        }
+
+        [Test]
+        public void TestRangeExceedingMaxIterationsThrows()
+        {
+            var context = new Context(new List<Hash>(), new Hash(), new Hash(), ErrorsOutputMode.Display, maxIterations: 10, CultureInfo.InvariantCulture, CancellationToken.None);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(
+                    () => (context["(1..100)"] as IEnumerable).Cast<object>().ToList(),
+                    Throws.TypeOf<MaximumIterationsExceededException>());
+                Assert.That(
+                    () => (context["(1..11)"] as IEnumerable).Cast<object>().ToList(),
+                    Throws.TypeOf<MaximumIterationsExceededException>());
+            });
+        }
+
+        [Test]
+        public void TestRangeWithinMaxIterationsSucceeds()
+        {
+            var context = new Context(new List<Hash>(), new Hash(), new Hash(), ErrorsOutputMode.Display, maxIterations: 10, CultureInfo.InvariantCulture, CancellationToken.None);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context["(1..5)"] as IEnumerable, Is.EqualTo(Enumerable.Range(1, 5)).AsCollection);
+                Assert.That(context["(1..10)"] as IEnumerable, Is.EqualTo(Enumerable.Range(1, 10)).AsCollection);
+            });
         }
 
         [Test]

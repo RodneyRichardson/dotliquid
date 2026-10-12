@@ -426,8 +426,11 @@ namespace DotLiquid
                         // Ranges.
                         match = RangeRegex.Match(key);
                         if (match.Success)
-                            return DotLiquid.Util.Range.Inclusive(Convert.ToInt32(Resolve(match.Groups[1].Value)),
-                                Convert.ToInt32(Resolve(match.Groups[2].Value)));
+                        {
+                            var startingRange = Convert.ToInt32(Resolve(match.Groups[1].Value));
+                            var endingRange = Convert.ToInt32(Resolve(match.Groups[2].Value));
+                            return Util.Range.Inclusive(this, startingRange, endingRange);
+                        }
                         break;
                     default:
                         // Integer.

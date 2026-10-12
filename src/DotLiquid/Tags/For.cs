@@ -57,7 +57,7 @@ namespace DotLiquid.Tags
     public class For : DotLiquid.Block
     {
         private static readonly Regex Syntax = R.B(R.Q(@"(\w+)\s+in\s+({0}+)\s*(reversed)?"), Liquid.QuotedFragment);
-        private static string ForTagMaxIterationsExceededException = Liquid.ResourceManager.GetString("ForTagMaximumIterationsExceededException");
+        internal static readonly string ForTagMaxIterationsExceededException = Liquid.ResourceManager.GetString("ForTagMaximumIterationsExceededException");
 
         private string _variableName, _collectionName, _name;
         private bool _reversed;
@@ -201,23 +201,30 @@ namespace DotLiquid.Tags
         {
             List<object> segments = new List<object>();
             int index = 0;
-            foreach (object item in collection)
+
+            IEnumerator enumerator = collection.GetEnumerator();
+            try
             {
-                context.CheckTimeout();
-
-                if (to != null && to.Value <= index)
-                    break;
-
-                if (from <= index)
-                    segments.Add(item);
-
-                ++index;
-
-                if (context.MaxIterations > 0 && index > context.MaxIterations)
+                while ((to == null || to.Value > index) && enumerator.MoveNext())
                 {
-                    throw new MaximumIterationsExceededException(For.ForTagMaxIterationsExceededException, context.MaxIterations.ToString());
+                    context.CheckTimeout();
+
+                    if (from <= index)
+                        segments.Add(enumerator.Current);
+
+                    ++index;
+
+                    if (context.MaxIterations > 0 && index > context.MaxIterations)
+                    {
+                        throw new MaximumIterationsExceededException(ForTagMaxIterationsExceededException, context.MaxIterations.ToString());
+                    }
                 }
             }
+            finally
+            {
+                (enumerator as IDisposable)?.Dispose();
+            }
+
             return segments;
         }
     }
