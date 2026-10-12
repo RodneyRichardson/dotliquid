@@ -1,7 +1,7 @@
 # Build script for dotliquid is presently stored securely on AppVeyor.
 # Below is ignored and kept for informational purposes only
 version: 2.4.{build}
-image: Visual Studio 2022
+image: Visual Studio 2026
 configuration: Release
 dotnet_csproj:
   patch: true
@@ -18,16 +18,12 @@ install:
 
     choco install codecov -y
 
-    dotnet --list-runtimes | find "Microsoft.NETCore.App 3.1" >nul
-
-    if %errorlevel% neq 0 ( choco install dotnetcore-runtime.install --version=3.1.32 -y )
-
+    dotnet --list-sdks | find "6.0." >nul || choco install dotnet-6.0-sdk -y
+    
     dotnet restore src/DotLiquid.sln
 cache:
 - C:\ProgramData\chocolatey\bin -> appveyor.yml
 - C:\ProgramData\chocolatey\lib -> appveyor.yml
-nuget:
-  project_feed: true
 build:
   project: src/DotLiquid.sln
   verbosity: minimal
