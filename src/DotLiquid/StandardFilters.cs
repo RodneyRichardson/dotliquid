@@ -681,7 +681,7 @@ namespace DotLiquid
         /// <param name="input">Input to be transformed by this filter</param>
         /// <param name="places">Number of decimal places for rounding</param>
         /// <returns>The rounded value; zero if input is invalid, or rounded to 0 decimals if places is invalid</returns>
-        /// <remarks>Behaviour differs from Ruby implementation for negative places values.
+        /// <remarks>Behavior differs from Ruby implementation for negative places values.
         /// This will treat it as any other invalid places value, and round to closest integer.</remarks>
         [LiquidFilter(MinVersion = SyntaxCompatibility.DotLiquid24)]
         public static object Round(Context context, object input, object places = null)
@@ -1047,7 +1047,7 @@ namespace DotLiquid
         }
 
         /// <summary>
-        /// Sums all items in an array. If <paramref name="propertyName"/> is supplied, it sums the property values./> 
+        /// Sums all items in an array. If <paramref name="propertyName"/> is supplied, it sums the property values. 
         /// </summary>
         /// <param name="context">The DotLiquid context</param>
         /// <param name="input">An array of numerics values, or objects with a numeric property, to be summed.</param>
