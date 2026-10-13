@@ -681,22 +681,24 @@ namespace DotLiquid
         /// <param name="input">Input to be transformed by this filter</param>
         /// <param name="places">Number of decimal places for rounding</param>
         /// <returns>The rounded value; zero if input is invalid, or rounded to 0 decimals if places is invalid</returns>
-        /// <remarks>Behaviour differs from Ruby implementation for negative places values.
+        /// <remarks>Behavior differs from Ruby implementation for negative places values.
         /// This will treat it as any other invalid places value, and round to closest integer.</remarks>
         [LiquidFilter(MinVersion = SyntaxCompatibility.DotLiquid24)]
         public static object Round(Context context, object input, object places = null)
         {
-            // Math.Round can handle at most 28 decimals, so clamp places into [0, 28].
-            var placesValue = Convert.ToDouble(NumericConverter.CoerceToNumericType(places, context.FormatProvider, 0.0));
-#if NET6_0_OR_GREATER
-            int decimals = (int)Math.Clamp(placesValue, 0, 28);
-#else
-            int decimals = (int)Math.Max(0, Math.Min(28, placesValue));
-#endif
-
             dynamic inputValue = NumericConverter.CoerceToNumericType(input, context.FormatProvider, 0);
+
             if (NumericConverter.IsReal(inputValue))
             {
+                // Math.Round can handle at most 28 decimals (decimal) or 15 (float/double), so clamp places into range.
+                int maxPlaces = inputValue is decimal ? 28 : 15;
+                var placesValue = Convert.ToDouble(NumericConverter.CoerceToNumericType(places, context.FormatProvider, 0.0));
+#if NET6_0_OR_GREATER
+                int decimals = (int)Math.Clamp(placesValue, 0, maxPlaces);
+#else
+                int decimals = (int)Math.Max(0, Math.Min(maxPlaces, placesValue));
+#endif
+
                 return Math.Round(inputValue, decimals);
             }
 
@@ -1045,7 +1047,7 @@ namespace DotLiquid
         }
 
         /// <summary>
-        /// Sums all items in an array. If <paramref name="propertyName"/> is supplied, it sums the property values./> 
+        /// Sums all items in an array. If <paramref name="propertyName"/> is supplied, it sums the property values. 
         /// </summary>
         /// <param name="context">The DotLiquid context</param>
         /// <param name="input">An array of numerics values, or objects with a numeric property, to be summed.</param>
@@ -1059,13 +1061,15 @@ namespace DotLiquid
             // If propertyName is specified, expect a list of objects with a numeric property of the same name
             if (propertyName != null)
             {
-                IEnumerable<object> values = input.Cast<object>()
+                IEnumerable<object> propertyValues = input.Cast<object>()
                     .Select(source => source.ResolveObjectPropertyValue(propertyName));
-                return Sum(context, values);
+                return Sum(context, propertyValues);
             }
 
+            // Flatten values to handle nested arrays
             object sum = 0;
-            foreach (object value in input)
+            var values = input.Flatten().Cast<object>();
+            foreach (object value in values)
             {
                 if (value != null)
                 {

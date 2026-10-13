@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace DotLiquid.Util
 {
@@ -40,7 +37,7 @@ namespace DotLiquid.Util
         /// <summary>
         /// A dictionary of numeric types and their allowable conversions.
         /// Based on the promotion table at
-        /// https://docs.microsoft.com/en-us/dotnet/standard/base-types/conversion-tables
+        /// https://docs.microsoft.com/dotnet/standard/base-types/conversion-tables
         /// </summary>
         public static readonly IReadOnlyDictionary<Type, Type[]> NumericTypePromotions = new ReadOnlyDictionary<Type, Type[]>(new Dictionary<Type, Type[]>
         {
@@ -62,25 +59,31 @@ namespace DotLiquid.Util
         /// Get the return type for an operation between the two numbers of the specified types
         /// </summary>
         /// <param name="left">Type of the left parameter</param>
-        /// <param name="right">Type of the left parameter</param>
+        /// <param name="right">Type of the right parameter</param>
         /// <returns>The return type</returns>
+        /// <exception cref="ArgumentNullException">Thrown if a parameter is null.</exception>
         /// <exception cref="ArgumentException">Thrown if a parameter is not a supported numeric type.</exception>
         public static Type GetBinaryResultType(Type left, Type right)
         {
-            if (left == right)
-                return left;
+            if (left == null)
+                throw new ArgumentNullException(paramName: nameof(left));
+            if (right == null)
+                throw new ArgumentNullException(paramName: nameof(right));
 
             if (!NumericConverter.NumericTypePromotions.TryGetValue(left, out Type[] leftTypes))
-                throw new System.ArgumentException("Argument is not numeric", nameof(left));
+                throw new ArgumentException(message: "Argument is not numeric", paramName: nameof(left));
             if (!NumericConverter.NumericTypePromotions.TryGetValue(right, out Type[] rightTypes))
-                throw new System.ArgumentException("Argument is not numeric", nameof(right));
+                throw new ArgumentException(message: "Argument is not numeric", paramName: nameof(right));
+
+            if (left == right)
+                return left;
 
             // Test left to right promotion
             if (rightTypes.Contains(left))
                 return left;
             if (leftTypes.Contains(right))
                 return right;
-            return rightTypes.First(t => leftTypes.Contains(t));
+            return rightTypes.First(_type => leftTypes.Contains(_type));
         }
 
         /// <summary>

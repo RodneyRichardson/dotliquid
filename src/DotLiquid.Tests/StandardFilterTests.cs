@@ -1248,6 +1248,18 @@ PaulGeorge",
         }
 
         [Test]
+        public void TestDividedByV20()
+        {
+            Helper.AssertTemplateResult("333.33", "{{ 1,000 | divided_by: 3 | round: 2}}");
+        }
+
+        [Test]
+        public void TestDividedByV24()
+        {
+            Helper.AssertTemplateResult("333", "{{ 1,000 | divided_by: 3 }}", SyntaxCompatibility.DotLiquid24);
+        }
+
+        [Test]
         public void TestUrlencode()
         {
             Assert.That(StandardFilters.UrlEncode("http://dotliquidmarkup.org/"), Is.EqualTo("http%3A%2F%2Fdotliquidmarkup.org%2F"));
