@@ -686,17 +686,19 @@ namespace DotLiquid
         [LiquidFilter(MinVersion = SyntaxCompatibility.DotLiquid24)]
         public static object Round(Context context, object input, object places = null)
         {
-            // Math.Round can handle at most 28 decimals, so clamp places into [0, 28].
-            var placesValue = Convert.ToDouble(NumericConverter.CoerceToNumericType(places, context.FormatProvider, 0.0));
-#if NET6_0_OR_GREATER
-            int decimals = (int)Math.Clamp(placesValue, 0, 28);
-#else
-            int decimals = (int)Math.Max(0, Math.Min(28, placesValue));
-#endif
-
             dynamic inputValue = NumericConverter.CoerceToNumericType(input, context.FormatProvider, 0);
+
             if (NumericConverter.IsReal(inputValue))
             {
+                // Math.Round can handle at most 28 decimals (decimal) or 15 (float/double), so clamp places into range.
+                int maxPlaces = inputValue is decimal ? 28 : 15;
+                var placesValue = Convert.ToDouble(NumericConverter.CoerceToNumericType(places, context.FormatProvider, 0.0));
+#if NET6_0_OR_GREATER
+                int decimals = (int)Math.Clamp(placesValue, 0, maxPlaces);
+#else
+                int decimals = (int)Math.Max(0, Math.Min(maxPlaces, placesValue));
+#endif
+
                 return Math.Round(inputValue, decimals);
             }
 
