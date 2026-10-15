@@ -238,6 +238,7 @@ namespace DotLiquid.Tests.Filters
             Assert.That(Round(1.2345m, (long)2), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
 
             Assert.That(Round(double.MaxValue, 1), Is.EqualTo(double.MaxValue).And.TypeOf(typeof(double)));
+            Assert.That(Round(double.MaxValue, 28), Is.EqualTo(double.MaxValue).And.TypeOf(typeof(double)));
         }
 
         [Test]
@@ -260,7 +261,7 @@ namespace DotLiquid.Tests.Filters
             Assert.That(Round(value, "-2"), Is.EqualTo(1m).And.TypeOf(typeof(decimal)));
             Assert.That(Round(value, "2.7"), Is.EqualTo(1.23m).And.TypeOf(typeof(decimal)));
 
-            // max values for place = 28 (handled by clamping into valid range)
+            // max values for places = 28 or 15 (handled by clamping into valid range)
             Assert.That(Round(1.123456789012345678901234567890123m, 50),
                 Is.EqualTo(1.1234567890123456789012345679m).And.TypeOf(typeof(decimal)));
             Assert.That(Round(1.10f, 50),
