@@ -302,6 +302,10 @@ namespace DotLiquid.Tests.Filters
 
             // Swap parameter order
             Assert.That(AtLeast(decimal.MaxValue, double.MaxValue), Is.EqualTo(double.MaxValue).And.TypeOf(typeof(double)));
+
+            // Check for boundary issues related to conversion between double and decimal 
+            // https://github.com/dotliquid/dotliquid/pull/571#discussion_r4274554681
+            Assert.That(AtLeast(10000000000000000m, 10000000000000002d), Is.EqualTo(10000000000000002d).And.TypeOf(typeof(double)));
         }
 
         [Test]
@@ -348,6 +352,10 @@ namespace DotLiquid.Tests.Filters
 
             // Swap parameter order
             Assert.That(AtMost(decimal.MaxValue, double.MaxValue), Is.EqualTo(decimal.MaxValue).And.TypeOf(typeof(decimal)));
+
+            // Check for boundary issues related to conversion between double and decimal 
+            // https://github.com/dotliquid/dotliquid/pull/571#discussion_r4274554681
+            Assert.That(AtMost(10000000000000002d, 10000000000000000m), Is.EqualTo(10000000000000000m).And.TypeOf(typeof(double)));
         }
 
         [Test]
