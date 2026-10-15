@@ -208,14 +208,32 @@ namespace DotLiquid
         public static object AtLeast(Context context, object input, object atLeast)
         {
             double n;
-            var inputNumber = Double.TryParse(input?.ToString(), NumberStyles.Number, context.CurrentCulture, out n);
+            bool inputNumber;
+            if (input is double d)
+            {
+                n = d;
+                inputNumber = true;
+            }
+            else
+            {
+                inputNumber = Double.TryParse(input?.ToString(), NumberStyles.Number, context.CurrentCulture, out n);
+            }
 
             double min;
-            var atLeastNumber = Double.TryParse(atLeast?.ToString(), NumberStyles.Number, context.CurrentCulture, out min);
+            bool atLeastNumber;
+            if (atLeast is double d2)
+            {
+                min = d2;
+                atLeastNumber = true;
+            }
+            else
+            {
+                atLeastNumber = Double.TryParse(atLeast?.ToString(), NumberStyles.Number, context.CurrentCulture, out min);
+            }
 
             if (inputNumber && atLeastNumber)
             {
-                return (double)((double)min > (double)n ? min : n);
+                return min > n ? min : n;
             }
             else
             {
@@ -233,14 +251,32 @@ namespace DotLiquid
         public static object AtMost(Context context, object input, object atMost)
         {
             double n;
-            var inputNumber = Double.TryParse(input?.ToString(), NumberStyles.Number, context.CurrentCulture, out n);
+            bool inputNumber;
+            if (input is double d)
+            {
+                n = d;
+                inputNumber = true;
+            }
+            else
+            {
+                inputNumber = Double.TryParse(input?.ToString(), NumberStyles.Number, context.CurrentCulture, out n);
+            }
 
             double max;
-            var atMostNumber = Double.TryParse(atMost?.ToString(), NumberStyles.Number, context.CurrentCulture, out max);
+            bool atMostNumber;
+            if (atMost is double d2)
+            {
+                max = d2;
+                atMostNumber = true;
+            }
+            else
+            {
+                atMostNumber = Double.TryParse(atMost?.ToString(), NumberStyles.Number, context.CurrentCulture, out max);
+            }
 
             if (inputNumber && atMostNumber)
             {
-                return (double)((double)max < (double)n ? max : n);
+                return max < n ? max : n;
             }
             else
             {
