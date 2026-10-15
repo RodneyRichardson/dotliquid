@@ -188,6 +188,7 @@ namespace DotLiquid.Tests.Filters
             Assert.That(Round("1.2345678", "two"), Is.Null);
             Assert.That(Round("1.2345678", -2), Is.Null);
             Assert.That(Round(1.123456789012345678901234567890123m, 50), Is.Null);
+            Assert.That(Round(double.MaxValue, 1), Is.Null);
 
             Assert.That(Round("1.2345678", 2.7), Is.EqualTo(1.235m));
 
@@ -209,6 +210,10 @@ namespace DotLiquid.Tests.Filters
             Assert.That(AtLeast(3.56, 5), Is.EqualTo(5).And.TypeOf(typeof(double)));
             Assert.That(AtLeast("10", 5), Is.EqualTo(10).And.TypeOf(typeof(double)));
             Assert.That(AtLeast("4", 5), Is.EqualTo(5).And.TypeOf(typeof(double)));
+
+            // Check for boundary issues related to conversion between double and decimal 
+            // https://github.com/dotliquid/dotliquid/pull/571#discussion_r4274554681
+            Assert.That(AtLeast(10000000000000000m, 10000000000000002d), Is.EqualTo(10000000000000002d).And.TypeOf(typeof(double)));
         }
 
         [Test]
@@ -234,6 +239,10 @@ namespace DotLiquid.Tests.Filters
             Assert.That(AtMost(3.56, 5), Is.EqualTo(3.56).And.TypeOf(typeof(double)));
             Assert.That(AtMost("10", 5), Is.EqualTo(5).And.TypeOf(typeof(double)));
             Assert.That(AtMost("4", 5), Is.EqualTo(4).And.TypeOf(typeof(double)));
+
+            // Check for boundary issues related to conversion between double and decimal 
+            // https://github.com/dotliquid/dotliquid/pull/571#discussion_r4274554681
+            Assert.That(AtMost(10000000000000002d, 10000000000000000m), Is.EqualTo(10000000000000000m).And.TypeOf(typeof(double)));
         }
 
         [Test]

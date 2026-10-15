@@ -209,13 +209,13 @@ namespace DotLiquid.Tests.Filters
         public void TestRoundTypes()
         {
             Assert.That(Round("1.2345678", 2.0), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
-            Assert.That(Round(1.2345678f, 2.0), Is.EqualTo(1.23).And.TypeOf(typeof(double)));
-            Assert.That(Round(1.2345678, 2.0), Is.EqualTo(1.23).And.TypeOf(typeof(double)));
+            Assert.That(Round(1.2345678f, 2.0), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
+            Assert.That(Round(1.2345678, 2.0), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
             Assert.That(Round(1.2345678m, 2.0), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
 
-            Assert.That(Round(1.2345678, 2), Is.EqualTo(1.23).And.TypeOf(typeof(double)));
-            Assert.That(Round(1.2345678, 2.0f), Is.EqualTo(1.23).And.TypeOf(typeof(double)));
-            Assert.That(Round(1.2345678, 2.0m), Is.EqualTo(1.23).And.TypeOf(typeof(double)));
+            Assert.That(Round(1.2345678, 2), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
+            Assert.That(Round(1.2345678, 2.0f), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
+            Assert.That(Round(1.2345678, 2.0m), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
             Assert.That(Round(1.2345678m, "2.0"), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
 
             Assert.That(Round((byte)1, 2), Is.EqualTo(1).And.TypeOf(typeof(byte)));
@@ -235,16 +235,19 @@ namespace DotLiquid.Tests.Filters
             Assert.That(Round(1.2345m, (int)2), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
             Assert.That(Round(1.2345m, (ulong)2), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
             Assert.That(Round(1.2345m, (long)2), Is.EqualTo(1.23).And.TypeOf(typeof(decimal)));
+
+            Assert.That(Round(double.MaxValue, 1), Is.EqualTo(double.MaxValue).And.TypeOf(typeof(double)));
+            Assert.That(Round(double.MaxValue, 28), Is.EqualTo(double.MaxValue).And.TypeOf(typeof(double)));
         }
 
         [Test]
         public void TestRoundPlacesRange()
         {
             // Single and Double floats handle up to 15 places
-            Assert.That(Round(1.5f, 15), Is.EqualTo(1.5).And.TypeOf(typeof(double)));
-            Assert.That(Round(1.5d, 15), Is.EqualTo(1.5).And.TypeOf(typeof(double)));
+            Assert.That(Round(1.5f, 15), Is.EqualTo(1.5).And.TypeOf(typeof(decimal)));
+            Assert.That(Round(1.5d, 15), Is.EqualTo(1.5).And.TypeOf(typeof(decimal)));
 
-            // Decimal handles up to 28 places (
+            // Decimal handles up to 28 places
             Assert.That(Round(1.5m, 28), Is.EqualTo(1.5).And.TypeOf(typeof(decimal)));
         }
 
@@ -257,12 +260,13 @@ namespace DotLiquid.Tests.Filters
             Assert.That(Round(value, "-2"), Is.EqualTo(1m).And.TypeOf(typeof(decimal)));
             Assert.That(Round(value, "2.7"), Is.EqualTo(1.23m).And.TypeOf(typeof(decimal)));
 
+            // max values for places = 28 or 15 (handled by clamping into valid range)
             Assert.That(Round(1.123456789012345678901234567890123m, 50),
-                Is.EqualTo(1.1234567890123456789012345679m).And.TypeOf(typeof(decimal))); // max = 28 places (clamped)
+                Is.EqualTo(1.1234567890123456789012345679m).And.TypeOf(typeof(decimal)));
             Assert.That(Round(1.10f, 50),
-                Is.EqualTo(1.1f).And.TypeOf(typeof(double))); // max = 15 places (clamped)
+                Is.EqualTo(1.1m).And.TypeOf(typeof(decimal)));
             Assert.That(Round(1.123d, 50),
-                Is.EqualTo(1.123d).And.TypeOf(typeof(double))); // max = 15 places (clamped)
+                Is.EqualTo(1.123m).And.TypeOf(typeof(decimal)));
 
             Assert.That(Round(value, 2.7), Is.EqualTo(1.23m));
             Assert.That(Round(value, 3.1), Is.EqualTo(1.235m));
@@ -301,6 +305,10 @@ namespace DotLiquid.Tests.Filters
 
             // Swap parameter order
             Assert.That(AtLeast(decimal.MaxValue, double.MaxValue), Is.EqualTo(double.MaxValue).And.TypeOf(typeof(double)));
+
+            // Check for boundary issues related to conversion between double and decimal 
+            // https://github.com/dotliquid/dotliquid/pull/571#discussion_r4274554681
+            Assert.That(AtLeast(10000000000000000m, 10000000000000002d), Is.EqualTo(10000000000000002d).And.TypeOf(typeof(double)));
         }
 
         [Test]
@@ -347,6 +355,10 @@ namespace DotLiquid.Tests.Filters
 
             // Swap parameter order
             Assert.That(AtMost(decimal.MaxValue, double.MaxValue), Is.EqualTo(decimal.MaxValue).And.TypeOf(typeof(decimal)));
+
+            // Check for boundary issues related to conversion between double and decimal 
+            // https://github.com/dotliquid/dotliquid/pull/571#discussion_r4274554681
+            Assert.That(AtMost(10000000000000002d, 10000000000000000m), Is.EqualTo(10000000000000000m).And.TypeOf(typeof(decimal)));
         }
 
         [Test]

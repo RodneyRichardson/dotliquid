@@ -690,6 +690,16 @@ namespace DotLiquid
 
             if (NumericConverter.IsReal(inputValue))
             {
+                // Round using decimal to avoid floating point rounding errors, if possible
+                try
+                {
+                    inputValue = Convert.ToDecimal(inputValue);
+                }
+                catch (OverflowException)
+                {
+                    // inputValue is too large for decimal, so leave it as double
+                }
+
                 // Math.Round can handle at most 28 decimals (decimal) or 15 (float/double), so clamp places into range.
                 int maxPlaces = inputValue is decimal ? 28 : 15;
                 var placesValue = Convert.ToDouble(NumericConverter.CoerceToNumericType(places, context.FormatProvider, 0.0));
@@ -943,26 +953,30 @@ namespace DotLiquid
         {
             dynamic val1 = NumericConverter.CoerceToNumericType(input, context.FormatProvider, 0);
             dynamic val2 = NumericConverter.CoerceToNumericType(atLeast, context.FormatProvider, 0);
+
+            dynamic comp1 = val1;
+            dynamic comp2 = val2;
+
+            // Comparison between double and decimal doesn't always work as expected due to
+            // precision differences.
+            // See https://github.com/dotliquid/dotliquid/pull/571#discussion_r4274554681
+            // Handle these as a special case by converting both to double.
+            if ((val1 is double && val2 is decimal) || (val1 is decimal && val2 is double))
+            {
+                comp1 = Convert.ToDouble(val1);
+                comp2 = Convert.ToDouble(val2);
+            }
+
             try
             {
-                return (val1 >= val2) ? val1 : val2;
+                return (comp1 >= comp2) ? val1 : val2;
             }
             catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
             {
                 // Not all combinations of types can be compared dynamically
-                // - try converting to Decimal or Double if that fails
-                dynamic comp1;
-                dynamic comp2;
-                try
-                {
-                    comp1 = Convert.ToDecimal(val1);
-                    comp2 = Convert.ToDecimal(val2);
-                }
-                catch (OverflowException)
-                {
-                    comp1 = Convert.ToDouble(val1);
-                    comp2 = Convert.ToDouble(val2);
-                }
+                // - try converting to Double if that fails
+                comp1 = Convert.ToDouble(val1);
+                comp2 = Convert.ToDouble(val2);
 
                 return (comp1 >= comp2) ? val1 : val2;
             }
@@ -980,26 +994,29 @@ namespace DotLiquid
         {
             dynamic val1 = NumericConverter.CoerceToNumericType(input, context.FormatProvider, 0);
             dynamic val2 = NumericConverter.CoerceToNumericType(atMost, context.FormatProvider, 0);
+
+            dynamic comp1 = val1;
+            dynamic comp2 = val2;
+
+            // Comparison between double and decimal doesn't always work as expected
+            // See https://github.com/dotliquid/dotliquid/pull/571#discussion_r4274554681
+            // Handle these as a special case by converting both to double.
+            if ((val1 is double &&  val2 is decimal) || (val1 is decimal && val2 is double))
+            {
+                comp1 = Convert.ToDouble(val1);
+                comp2 = Convert.ToDouble(val2);
+            }
+
             try
             {
-                return (val1 <= val2) ? val1 : val2;
+                return (comp1 <= comp2) ? val1 : val2;
             }
             catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
             {
                 // Not all combinations of types can be compared dynamically
-                // - try converting to Decimal or Double if that fails
-                dynamic comp1;
-                dynamic comp2;
-                try
-                {
-                    comp1 = Convert.ToDecimal(val1);
-                    comp2 = Convert.ToDecimal(val2);
-                }
-                catch (OverflowException)
-                {
-                    comp1 = Convert.ToDouble(val1);
-                    comp2 = Convert.ToDouble(val2);
-                }
+                // - try converting to Double if that fails
+                comp1 = Convert.ToDouble(val1);
+                comp2 = Convert.ToDouble(val2);
 
                 return (comp1 <= comp2) ? val1 : val2;
             }
@@ -1016,7 +1033,9 @@ namespace DotLiquid
 
             List<object> ary;
             if (input is IEnumerable)
+            {
                 ary = ((IEnumerable)input).Flatten().Cast<object>().ToList();
+            }
             else
             {
                 ary = new List<object>(new[] { input });
