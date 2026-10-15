@@ -239,6 +239,9 @@ namespace DotLiquid.Tests.Filters
                 Helper.AssertTemplateResult("1.26", "{{ x | plus: 0 | round: 2 }}",
                     syntax: SyntaxCompatibilityLevel,
                     localVariables: values);
+                Helper.AssertTemplateResult("2.36", "{{ x | plus: 1.1 | round: 2 }}",
+                    syntax: SyntaxCompatibilityLevel,
+                    localVariables: values);
             });
         }
 
