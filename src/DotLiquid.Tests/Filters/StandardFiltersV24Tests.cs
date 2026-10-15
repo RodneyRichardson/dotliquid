@@ -355,7 +355,7 @@ namespace DotLiquid.Tests.Filters
 
             // Check for boundary issues related to conversion between double and decimal 
             // https://github.com/dotliquid/dotliquid/pull/571#discussion_r4274554681
-            Assert.That(AtMost(10000000000000002d, 10000000000000000m), Is.EqualTo(10000000000000000m).And.TypeOf(typeof(double)));
+            Assert.That(AtMost(10000000000000002d, 10000000000000000m), Is.EqualTo(10000000000000000m).And.TypeOf(typeof(decimal)));
         }
 
         [Test]
