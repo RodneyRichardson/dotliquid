@@ -227,6 +227,22 @@ namespace DotLiquid.Tests.Filters
         }
 
         [Test]
+        public void TestRoundAfterPlus()
+        {
+            Hash values = Hash.FromAnonymousObject(new { x = 1.255d });
+
+            Assert.Multiple(() =>
+            {
+                Helper.AssertTemplateResult("1.26", "{{ x | round: 2 }}",
+                    syntax: SyntaxCompatibilityLevel,
+                    localVariables: values);
+                Helper.AssertTemplateResult("1.26", "{{ x | plus: 0 | round: 2 }}",
+                    syntax: SyntaxCompatibilityLevel,
+                    localVariables: values);
+            });
+        }
+
+        [Test]
         public void TestRoundHandlesBadInput()
         {
             Helper.AssertTemplateResult("0", "{{ nonesuch | round }}", syntax: SyntaxCompatibilityLevel);
