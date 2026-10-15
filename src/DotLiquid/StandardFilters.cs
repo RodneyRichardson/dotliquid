@@ -698,6 +698,15 @@ namespace DotLiquid
 #else
                 int decimals = (int)Math.Max(0, Math.Min(maxPlaces, placesValue));
 #endif
+                // Round using decimal to avoid floating point rounding errors, if possible
+                try
+                {
+                    inputValue = Convert.ToDecimal(inputValue);
+                }
+                catch (OverflowException)
+                {
+                    // inputValue is too large for decimal, so leave it as float/double
+                }
 
                 return Math.Round(inputValue, decimals);
             }

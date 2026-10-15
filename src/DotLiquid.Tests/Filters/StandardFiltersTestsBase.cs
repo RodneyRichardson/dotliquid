@@ -227,7 +227,7 @@ namespace DotLiquid.Tests.Filters
         }
 
         [Test]
-        public void TestRoundAfterPlus()
+        public void TestRoundDouble()
         {
             Hash values = Hash.FromAnonymousObject(new { x = 1.255d });
 

@@ -163,6 +163,7 @@ namespace DotLiquid.Tests.Filters
             Assert.That(Round("1.2345678", "two"), Is.Null);
             Assert.That(Round("1.2345678", -2), Is.Null);
             Assert.That(Round(1.123456789012345678901234567890123m, 50), Is.Null);
+            Assert.That(Round(double.MaxValue, 1), Is.Null);
 
             Assert.That(Round("1.2345678", 2.7), Is.EqualTo(1.235m));
 
