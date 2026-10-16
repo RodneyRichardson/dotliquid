@@ -4,12 +4,10 @@
         "filters, find index,", // not yet implemented
         "filters, has,", // not yet implemented
         "filters, reject,", // not yet implemented
-        "filters, sum,", // not yet implemented
         "tags, doc,", // not yet implemented
         "tags, echo,", // not yet implemented
         "tags, inline comment,", // not yet implemented
         "tags, liquid,", // not yet implemented
-        "tags, render,", // not yet implemented
     ],
     "newline_groups": [
         // Tests in these groups will replace \n with \r\n expected results
@@ -51,51 +49,16 @@
         // DotLiquid #457
         "filters, date, timestamp string",
         // Non-integer arguments for numeric methods
-        "filters, at least, argument string not a number",
-        "filters, at least, left value not a number negative argument",
-        "filters, at least, left value not a number",
-        "filters, at most, left value not a number",
-        "filters, ceil, not a string, int or float",
-        "filters, ceil, string not a number",
-        "filters, divided by, not a string, int or float",
-        "filters, divided by, string not a number",
-        "filters, floor, not a string, int or float",
-        "filters, floor, string not a number",
-        "filters, minus, arg string not a number",
-        "filters, minus, not a string, int or float",
-        "filters, minus, string not a number",
-        "filters, modulo, not a string, int or float",
-        "filters, modulo, string not a number",
-        "filters, plus, arg string not a number",
-        "filters, plus, not a string, int or float",
-        "filters, plus, string not a number",
         "range, end is not a number",
         "range, start is not a number",
         // Undefined Arguments
-        "filters, abs, undefined left value",
-        "filters, at least, undefined argument",
-        "filters, at least, undefined left value",
-        "filters, at most, undefined argument",
-        "filters, at most, undefined left value",
-        "filters, ceil, undefined left value",
         "filters, concat, undefined argument is an error",
-        "filters, divided by, undefined argument",
-        "filters, divided by, undefined left value",
-        "filters, floor, undefined left value",
         "filters, map, undefined argument",
-        "filters, minus, undefined argument",
-        "filters, minus, undefined left value",
-        "filters, modulo, undefined argument",
-        "filters, modulo, undefined left value",
-        "filters, plus, undefined argument",
-        "filters, plus, undefined left value",
         "filters, remove, undefined argument",
         "filters, replace, undefined first argument",
         "filters, slice, undefined first argument",
         "filters, slice, undefined second argument",
         "filters, sort natural, argument is undefined",
-        "filters, times, undefined argument",
-        "filters, times, undefined left value",
         "filters, truncate, undefined first argument",
         "filters, truncatewords, undefined first argument",
         "filters, where, both arguments are undefined",
@@ -121,7 +84,6 @@
         "filters, default, missing argument",
         "filters, default, not empty list",
         "filters, default, not empty object",
-        "filters, divided by, left value is an empty string",
         "filters, first, left value is not an array",
         "tags, for, access parentloop",
         "tags, for, blank empty loops",
@@ -178,8 +140,6 @@
         "filters, replace, left value is an object",
         "filters, reverse, array of things",
         "filters, reverse, left value not an array",
-        "filters, round, argument is a negative",
-        "filters, round, argument is a string",
         "filters, slice, first argument is a float",
         "filters, slice, not a string",
         "filters, slice, second argument is a float",
@@ -221,22 +181,22 @@
         "filters, map, argument is explicit nil",
     ],
     "alternate_test_expectations": {
+        // DotLiquid allows strings, and treats invalid values as zero
+        "filters, divided by, arg string not a number": "∞",
+        "filters, divided by, divied by zero": "∞",
         "filters, divided by, float division": "2.8571428571428571428571428571",
         "filters, divided by, integer value and float arg": "5",
-        "filters, divided by, render": "5 5",
         "filters, divided by, zero divided by float": "0",
-        "filters, minus, integer value and float arg": "8",
-        "filters, modulo, integer value and float arg": "0",
-        "filters, modulo, string value and argument": "0",
-        "filters, plus, integer value and float arg": "12",
         // With Rails/ActiveSupport these work similar to DotLiquid
         "filters, first, first of a string": "h",
         "filters, last, last of a string": "o",
         "special, first of a string": "h",
         "special, last of a string": "o",
-        // These operators are implemented by DotLiquid but not Ruby
+        // if_tag: These operators are implemented by DotLiquid but not Ruby
         "tags, if, endswith is not a valid operator": "TRUE",
         "tags, if, haskey is not a valid operator": "TRUE",
-        "tags, if, startswith is not a valid operator": "TRUE",
+        "tags, if, startswith is not a valid operator": "TRUE"
+        // sum_filter: Objects without the specified propertyName are treated as zero
+        "filters, sum, properties arguments with non-hash items": "0",
     }
 }
