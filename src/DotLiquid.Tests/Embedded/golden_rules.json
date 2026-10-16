@@ -8,6 +8,7 @@
         "tags, echo,", // not yet implemented
         "tags, inline comment,", // not yet implemented
         "tags, liquid,", // not yet implemented
+        "tags, render,", // not yet implemented
     ],
     "newline_groups": [
         // Tests in these groups will replace \n with \r\n expected results
@@ -186,7 +187,12 @@
         "filters, divided by, divied by zero": "∞",
         "filters, divided by, float division": "2.8571428571428571428571428571",
         "filters, divided by, integer value and float arg": "5",
+        "filters, divided by, undefined argument": "∞",
         "filters, divided by, zero divided by float": "0",
+        "filters, modulo, arg string not a number": "NaN",
+        "filters, modulo, string not a number": "0",
+        "filters, modulo, undefined argument": "NaN",
+        "filters, round, argument is a negative": "6",
         // With Rails/ActiveSupport these work similar to DotLiquid
         "filters, first, first of a string": "h",
         "filters, last, last of a string": "o",
